@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "worldeventcomms",
+  "version": "${version}",
+  "name": "WorldEventComms",
+  "description": "A Wynncraft mod to communicate world event status to parties.",
+  "authors": [],
+  "contact": {},
+  "license": "GPL-3.0",
+  "icon": "assets/worldeventcomms/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "io.c0ded.worldeventcomms.client.WorldEventCommsClient"
+    ],
+    "main": [
+      "io.c0ded.worldeventcomms.WorldEventComms"
+    ]
+  },
+  "mixins": [
+    "worldeventcomms.mixins.json",
+    {
+      "config": "worldeventcomms.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
