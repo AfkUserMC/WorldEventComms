@@ -26,7 +26,7 @@ public class ScoreboardReader {
                     String eventName = eventInfo.getString().replaceAll("§[0-9a-fA-Fklmnor]", "").replaceFirst(" \\(.*\\)", "");
                     String eventTime = eventInfo.getString().replaceAll("§[0-9a-fA-Fklmnor]", "").replaceFirst("^[^(]*", "").replaceFirst(" left\\)", "").replace("(", "");
                     // this is a horrible way to get the time, but i don't care.
-                    if (eventTime.isEmpty()) {eventTime = "a moment";}
+                    if (eventTime.isEmpty()) return ScoreboardResult.fail("Could not get time left for tracked world event. Is the world event in progress?");
                     return ScoreboardResult.ok(Map.entry(eventName, eventTime));
                 } else {
                     return ScoreboardResult.fail("Could not find full information for tracked world event.");
