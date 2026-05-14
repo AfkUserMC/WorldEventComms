@@ -7,9 +7,7 @@ import io.c0ded.worldeventcomms.client.compat.WynntilsCompat;
 import io.c0ded.worldeventcomms.client.config.ConfigManager;
 import io.c0ded.worldeventcomms.client.session.SessionState;
 import io.c0ded.worldeventcomms.client.text.ModTexts;
-import io.c0ded.worldeventcomms.client.util.ScoreboardReader;
-import io.c0ded.worldeventcomms.client.util.ScoreboardResult;
-import io.c0ded.worldeventcomms.client.util.ServerUtils;
+import io.c0ded.worldeventcomms.client.util.*;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
@@ -54,26 +52,46 @@ public class WorldEventCommand {
                             if (source.getClient().world != null) {
                                 ScoreboardResult<Map.Entry<String, String>> worldEvent = ScoreboardReader.getCurrentWorldEvent(source.getClient().world.getScoreboard());
                                 if (!worldEvent.success()) {
-                                    source.sendError(Text.literal(worldEvent.error()));
-                                    if (source.getClient().getNetworkHandler() != null) {
-                                        source.getClient().getNetworkHandler().sendChatCommand("p We are currently in a world event. Further details are unavailable.");
-                                    }
-                                    return 0;
-                                } else {
-                                    if (source.getClient().getNetworkHandler() != null) {
-                                        String wavesPlural;
+                                    InWorldResult<String> fallbackTargets = InWorldReader.getTargets(source.getClient().world);
+                                    if (fallbackTargets.success()) {
                                         String targetsPlural;
-                                        if (worldEvent.value().getKey().strip().equals("1")) {
-                                            wavesPlural = "";
-                                        } else {
-                                            wavesPlural = "s";
-                                        }
-                                        if (worldEvent.value().getValue().strip().equals("1")) {
+                                        if (fallbackTargets.value().strip().equals("1")) {
                                             targetsPlural = "";
                                         } else {
                                             targetsPlural = "s";
                                         }
-                                        source.getClient().getNetworkHandler().sendChatCommand("p We are currently in a world event with " + worldEvent.value().getKey().strip() + " wave" + wavesPlural + " and " + worldEvent.value().getValue().strip() + " target" + targetsPlural + " left.");
+                                        if (source.getClient().getNetworkHandler() != null) {
+                                            source.getClient().getNetworkHandler().sendChatCommand("p We are currently in a world event with " + fallbackTargets.value().strip() + " target" + targetsPlural + " left.");
+                                        }
+                                        return 1;
+                                    } else {
+                                        source.sendError(Text.literal(worldEvent.error()));
+                                        if (source.getClient().getNetworkHandler() != null) {
+                                            source.getClient().getNetworkHandler().sendChatCommand("p We are currently in a world event. Further details are unavailable.");
+                                        }
+                                        return 0;
+                                    }
+                                } else {
+                                    if (source.getClient().getNetworkHandler() != null) {
+                                        String waves = worldEvent.value().getKey().strip();
+                                        String targets = worldEvent.value().getValue().strip();
+                                        if (worldEvent.value().getValue().equals("an unknown amount of")) {
+                                            InWorldResult<String> fallbackTargets = InWorldReader.getTargets(source.getClient().world);
+                                            if (fallbackTargets.success()) {targets = fallbackTargets.value();}
+                                        }
+                                        String wavesPlural;
+                                        String targetsPlural;
+                                        if (waves.equals("1")) {
+                                            wavesPlural = "";
+                                        } else {
+                                            wavesPlural = "s";
+                                        }
+                                        if (targets.equals("1")) {
+                                            targetsPlural = "";
+                                        } else {
+                                            targetsPlural = "s";
+                                        }
+                                        source.getClient().getNetworkHandler().sendChatCommand("p We are currently in a world event with " + waves + " wave" + wavesPlural + " and " + targets + " target" + targetsPlural + " left.");
                                         return 1;
                                     } else {
                                         return 0;
