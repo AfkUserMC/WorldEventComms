@@ -48,6 +48,15 @@ public class ScoreboardReader {
             if (entry.isPresent()) {
                 String wavesLeft;
                 String targetsLeft;
+                int timeIndex = entry.get().value() - 1; // for error checking
+                Optional<ScoreboardEntry> timeEntry = entries.stream()
+                        .filter(e -> e.name() != null && e.value() == timeIndex)
+                        .findFirst();
+                if (timeEntry.isPresent()) {
+                    if (timeEntry.get().name().getString().contains("Event Complete")) {
+                        return ScoreboardResult.fail("Cannot get status for a completed world event.");
+                    }
+                }
                 int waveIndex = entry.get().value() - 2;
                 Optional<ScoreboardEntry> waveEntry = entries.stream()
                         .filter(e -> e.name() != null && e.value() == waveIndex)
